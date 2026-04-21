@@ -4,6 +4,7 @@
 #include <nav_interfaces/action/navigate.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <cmath>
 
 // We need this to convert the quaternion orientation into yaw (theta)
 #include <tf2/LinearMath/Quaternion.h>
@@ -92,10 +93,103 @@ private:
     std::thread{std::bind(&NavigationServer::execute, this, std::placeholders::_1), goal_handle}.detach();
   }
 
+  
   // --- THE CONTROL LOOP ---
   void execute(const std::shared_ptr<GoalHandleNavigate> goal_handle)
   {
-      // We will write the navigation math here next!
+    RCLCPP_INFO(this->get_logger(), "Executing goal...");
+    rclcpp::Rate loop_rate(10); // Run the control loop at 10 Hz
+    
+    const auto goal = goal_handle->get_goal();
+    auto feedback = std::make_shared<Navigate::Feedback>();
+    auto result = std::make_shared<Navigate::Result>();
+    auto twist_msg = geometry_msgs::msg::Twist();
+
+    double distance_tolerance = 0.1;
+    double angle_tolerance = 0.05;
+
+    while (rclcpp::ok()) {
+      // 1. Check if the client requested to cancel the action
+      if (goal_handle->is_canceling()) {
+        result->success = false;
+        result->final_x = current_x_;
+        result->final_y = current_y_;
+        goal_handle->canceled(result);
+        RCLCPP_INFO(this->get_logger(), "Goal canceled by user!");
+        
+        // Stop the robot immediately
+        twist_msg.linear.x = 0.0;
+        twist_msg.angular.z = 0.0;
+        cmd_vel_pub_->publish(twist_msg);
+        return;
+      }
+
+      // 2. Calculate errors (distance and angle)
+      double diff_x = goal->target_x - current_x_;
+      double diff_y = goal->target_y - current_y_;
+      double distance = std::sqrt(diff_x * diff_x + diff_y * diff_y);
+      double target_angle = std::atan2(diff_y, diff_x);
+      
+      // Normalize the angle difference to stay between -pi and pi
+      double angle_diff = target_angle - current_yaw_;
+      while (angle_diff > M_PI) angle_diff -= 2.0 * M_PI;
+      while (angle_diff < -M_PI) angle_diff += 2.0 * M_PI;
+
+      // 3. Publish live feedback to the client
+      feedback->distance_to_goal = distance;
+      feedback->angle_to_goal = angle_diff;
+      goal_handle->publish_feedback(feedback);
+
+      // 4. Proportional Control Logic
+      if (distance > distance_tolerance) {
+        // If the robot is facing the wrong way, rotate first
+        if (std::abs(angle_diff) > 0.2) {
+            twist_msg.linear.x = 0.0;
+            twist_msg.angular.z = 0.8 * angle_diff; 
+        } else {
+            // Move forward and adjust steering
+            twist_msg.linear.x = 0.5 * distance;
+            twist_msg.angular.z = 0.8 * angle_diff;
+        }
+
+        // Cap the maximum speeds so the robot doesn't fly off the map
+        if (twist_msg.linear.x > 1.0) twist_msg.linear.x = 1.0;
+        if (twist_msg.angular.z > 1.0) twist_msg.angular.z = 1.0;
+        if (twist_msg.angular.z < -1.0) twist_msg.angular.z = -1.0;
+
+        cmd_vel_pub_->publish(twist_msg);
+      } else {
+        // We reached the (x, y) target! Now align with the final target_theta
+        double final_angle_diff = goal->target_theta - current_yaw_;
+        while (final_angle_diff > M_PI) final_angle_diff -= 2.0 * M_PI;
+        while (final_angle_diff < -M_PI) final_angle_diff += 2.0 * M_PI;
+
+        if (std::abs(final_angle_diff) > angle_tolerance) {
+            twist_msg.linear.x = 0.0;
+            twist_msg.angular.z = 0.8 * final_angle_diff;
+            cmd_vel_pub_->publish(twist_msg);
+        } else {
+            // We are perfectly positioned and aligned. Break the loop!
+            break;
+        }
+      }
+
+      // Sleep to maintain our 10 Hz loop rate
+      loop_rate.sleep();
+    }
+
+    // 5. Goal Successfully Reached
+    if (rclcpp::ok()) {
+      twist_msg.linear.x = 0.0;
+      twist_msg.angular.z = 0.0;
+      cmd_vel_pub_->publish(twist_msg);
+
+      result->success = true;
+      result->final_x = current_x_;
+      result->final_y = current_y_;
+      goal_handle->succeed(result);
+      RCLCPP_INFO(this->get_logger(), "Target successfully reached!");
+    }
   }
 };
 }  // namespace nav_project
