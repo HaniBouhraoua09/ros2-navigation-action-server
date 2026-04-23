@@ -26,13 +26,13 @@ The system commands a robot in a Gazebo simulation to navigate to user-defined c
     │   ├── CMakeLists.txt
     │   └── package.xml
     │
-    ├── nav_interfaces/      <-- (Phase 1: Your custom action blueprint)
+    ├── nav_interfaces/      <-- (Phase 1: custom action blueprint)
     │   ├── action/
     │   │   └── Navigate.action
     │   ├── CMakeLists.txt
     │   └── package.xml
     │
-    └── nav_project/         <-- (Phases 2-5: Your main C++ logic)
+    └── nav_project/         <-- (Phases 2-5: main C++ logic)
         ├── launch/
         │   └── navigation.launch.py              <-- (The background launch script)
         ├── src/
