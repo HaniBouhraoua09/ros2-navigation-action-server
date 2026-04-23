@@ -1,34 +1,14 @@
 # RT2 Assignment 1: Containerized Navigation Stack
 
-Done by : **Bouhraoua Hani**
-ID : **8314923**
-
-**Course:** Research Track 2 (Master's in Robotics Engineering)  
+**Done by** : Bouhraoua Hani .
+**ID** : 8314923 .
+**Course:** Research Track 2 (Master's in Robotics Engineering).
+**University of genoa** .
 
 ## Project Overview
 This repository contains a complete ROS 2 navigation stack built entirely using C++ components. The objective of this assignment is to dynamically load an Action Server and an Action Client (User Interface) into the same `component_container` to achieve highly efficient, zero-copy intra-process communication. 
 
 The system commands a robot in a Gazebo simulation to navigate to user-defined coordinates (x, y, theta) using proportional control kinematics, while allowing for asynchronous goal cancellation.
-
-## Implementation Phases
-
-The project architecture was developed systematically across five phases:
-
-* **Phase 1: Custom Action Interface (`nav_interfaces`)**
-    * Created a standalone package to define the communication protocol.
-    * Defined `Maps.action` comprising the Goal (target x, y, theta), Feedback (current distance and angle errors), and Result (success state and final coordinates).
-* **Phase 2: Navigation Action Server Component**
-    * Developed `navigation_server_component.cpp` as a ROS 2 node inheriting from `rclcpp::Node`.
-    * Implemented an odometry subscriber (`/odom`) to track current pose using `tf2` quaternion-to-Euler conversions.
-    * Engineered a proportional control loop running in an isolated thread to calculate heading and distance errors, publishing velocities to `/cmd_vel` while continuously monitoring for cancellation requests.
-* **Phase 3: User Interface Action Client Component**
-    * Developed `ui_client_component.cpp` to send goals and handle server callbacks.
-    * Utilized C++ `std::thread` to isolate standard terminal input (`std::cin`). This ensures the ROS 2 executor remains unblocked to process incoming feedback while the user navigates the interactive menu.
-* **Phase 4: Component Containerization**
-    * Configured `CMakeLists.txt` to compile both the server and client as shared libraries (`.so` plugins).
-    * Registered the plugins using the `RCLCPP_COMPONENTS_REGISTER_NODE` macro, enabling dynamic loading at runtime.
-* **Phase 5: Deployment and Execution**
-    * Prepared execution methodologies utilizing both Python launch scripts (`ComposableNodeContainer`) and manual terminal loading to accommodate interactive standard input requirements.
 
 
 ## Final directory architecture of entire ROS_2 workspace.
@@ -61,6 +41,28 @@ The project architecture was developed systematically across five phases:
         ├── CMakeLists.txt                        <-- (Configured for shared libraries)
         └── package.xml                           <-- (Includes tf2 dependency)
 ```
+
+
+## Implementation Phases
+
+The project architecture was developed systematically across five phases:
+
+* **Phase 1: Custom Action Interface (`nav_interfaces`)**
+    * Created a standalone package to define the communication protocol.
+    * Defined `Maps.action` comprising the Goal (target x, y, theta), Feedback (current distance and angle errors), and Result (success state and final coordinates).
+* **Phase 2: Navigation Action Server Component**
+    * Developed `navigation_server_component.cpp` as a ROS 2 node inheriting from `rclcpp::Node`.
+    * Implemented an odometry subscriber (`/odom`) to track current pose using `tf2` quaternion-to-Euler conversions.
+    * Engineered a proportional control loop running in an isolated thread to calculate heading and distance errors, publishing velocities to `/cmd_vel` while continuously monitoring for cancellation requests.
+* **Phase 3: User Interface Action Client Component**
+    * Developed `ui_client_component.cpp` to send goals and handle server callbacks.
+    * Utilized C++ `std::thread` to isolate standard terminal input (`std::cin`). This ensures the ROS 2 executor remains unblocked to process incoming feedback while the user navigates the interactive menu.
+* **Phase 4: Component Containerization**
+    * Configured `CMakeLists.txt` to compile both the server and client as shared libraries (`.so` plugins).
+    * Registered the plugins using the `RCLCPP_COMPONENTS_REGISTER_NODE` macro, enabling dynamic loading at runtime.
+* **Phase 5: Deployment and Execution**
+    * Prepared execution methodologies utilizing both Python launch scripts (`ComposableNodeContainer`) and manual terminal loading to accommodate interactive standard input requirements.
+
 
 ## Prerequisites
 
