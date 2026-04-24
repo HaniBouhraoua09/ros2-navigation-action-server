@@ -14,7 +14,7 @@ The system commands a robot in a Gazebo simulation to navigate to user-defined c
 ## Final directory architecture of entire ROS_2 workspace.
 
 ```
-~/rt2_assignment_ws/
+~/ros2-navigation-action-server-main/
 
 ├── README.md                
 └── src/
@@ -69,8 +69,8 @@ The project architecture was developed systematically across five phases:
 Before compiling the workspace, the specific simulation environment must be downloaded into the `src` directory.
 
 ```bash
-cd ~/Desktop/rt2_assignment_ws/src
-git clone -b rt2 [https://github.com/CarmineD8/bme_gazebo_sensors.git](https://github.com/CarmineD8/bme_gazebo_sensors.git)
+cd ~/Desktop/ros2-navigation-action-server-main/src
+git clone -b rt2 https://github.com/CarmineD8/bme_gazebo_sensors.git
 ```
 
 ## How to Build
@@ -78,7 +78,7 @@ git clone -b rt2 [https://github.com/CarmineD8/bme_gazebo_sensors.git](https://g
 Navigate to the root of the workspace and compile the packages using `colcon`:
 
 ```bash
-cd ~/Desktop/rt2_assignment_ws
+cd ~/Desktop/ros2-navigation-action-server-main
 colcon build
 source install/setup.bash
 ```
