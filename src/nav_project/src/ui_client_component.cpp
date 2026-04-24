@@ -4,6 +4,8 @@
 #include <nav_interfaces/action/navigate.hpp>
 #include <iostream>
 #include <thread>
+#include <sys/select.h>
+#include <unistd.h>
 
 namespace nav_project
 {
@@ -36,6 +38,7 @@ private:
   std::shared_ptr<GoalHandleNavigate> active_goal_handle_;
 
   // --- THE TERMINAL UI LOOP ---
+
   void ui_loop()
   {
     while (rclcpp::ok()) {
@@ -50,11 +53,26 @@ private:
 
         send_goal(x, y, theta);
       } else {
-        std::cout << "\n[Robot is moving] Type 'c' and press Enter to CANCEL: ";
-        char command;
-        std::cin >> command;
-        if (command == 'c' || command == 'C') {
-          cancel_goal();
+        std::cout << "\n[Robot is moving] Type 'c' and press Enter to CANCEL: " << std::flush;
+        
+        // This inner loop checks the keyboard every 100ms without freezing!
+        while (is_navigating_ && rclcpp::ok()) {
+          fd_set readfds;
+          FD_ZERO(&readfds);
+          FD_SET(STDIN_FILENO, &readfds);
+          struct timeval timeout;
+          timeout.tv_sec = 0;
+          timeout.tv_usec = 100000; // 100 millisecond timeout
+          
+          // Check if there is anything waiting to be read from the terminal
+          int ready = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &timeout);
+          if (ready > 0 && FD_ISSET(STDIN_FILENO, &readfds)) {
+            char command;
+            std::cin >> command;
+            if (command == 'c' || command == 'C') {
+              cancel_goal();
+            }
+          }
         }
       }
     }
