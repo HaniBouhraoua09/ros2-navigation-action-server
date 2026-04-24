@@ -1,8 +1,8 @@
 # RT2 Assignment 1: Containerized Navigation Stack
 
-**Done by** : Bouhraoua Hani .
-**ID** : 8314923 .
-**Course:** Research Track 2 (Master's in Robotics Engineering).
+**Done by** : Bouhraoua Hani . <br>
+**ID** : 8314923 . <br>
+**Course:** Research Track 2 (Master's in Robotics Engineering). <br>
 **University of genoa** .
 
 ## Project Overview
@@ -18,7 +18,7 @@ The system commands a robot in a Gazebo simulation to navigate to user-defined c
 
 ├── README.md                
 └── src/
-    ├── bme_gazebo_sensors/  <-- (The professor's simulation repository you cloned)
+    ├── bme_gazebo_sensors/  <-- (The professor's simulation repository to be cloned)
     │   ├── launch/
     │   │   └── spawn_robot_ex.launch.py
     │   ├── models/
