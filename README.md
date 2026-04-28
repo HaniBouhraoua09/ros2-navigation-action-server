@@ -90,7 +90,7 @@ To properly interact with the C++ `std::cin` prompts while utilizing component c
 **Terminal 1: Start the Gazebo & RViz Simulation**
 This launches the walled arena and the robot.
 ```bash
-ros2 launch bme_gazebo_sensors spawn_robot_ex.launch.py
+ros2 launch bme_gazebo_sensors spawn_robot.launch.py
 ```
 
 **Terminal 2: Initialize the Component Container**
