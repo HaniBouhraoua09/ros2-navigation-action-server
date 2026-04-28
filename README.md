@@ -21,6 +21,8 @@ The system commands a robot in a Gazebo simulation to navigate to user-defined c
     ├── bme_gazebo_sensors/  <-- (The professor's simulation repository to be cloned)
     │   ├── launch/
     │   │   └── spawn_robot_ex.launch.py
+    │   │   └── spawn_robot.launch.py
+    │   │   └── world.launch.py
     │   ├── models/
     │   ├── rviz/
     │   ├── CMakeLists.txt
